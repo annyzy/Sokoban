@@ -91,8 +91,6 @@ def isDeadLock(Sokoban : SokobanMap):
         left=currMap[boxRow][boxColumn-1]
         left=(left == 1) or (left == 2) or (left == 5)
         if (up and right) or (right and down) or (down and left) or (left and up):
-            currMap[boxRow][boxColumn]=7
-            showMap(currMap)
             return True
     # Corral deadlocks
     # Closed diagonal deadlocks

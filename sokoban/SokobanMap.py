@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 import utilitiesLWB
 #map中数值含义：      0:空白    1：墙     2：箱子位置    3：箱子目标    4：小人    5:箱子在目标上    6:小人在目标上
@@ -123,11 +124,10 @@ class SokobanMap:
     #返回的是SokobanMap class：move成功；返回的是None：move失败
     #return is SokobanMap class：move successed; return is None：move failed
     def move(self,direction):
-        tempSokoban=SokobanMap(self.walls, self.boxes, self.targets, self.agent, self.currMap)
+        tempSokoban=SokobanMap(copy.deepcopy(self.walls) , copy.deepcopy(self.boxes), copy.deepcopy(self.targets), copy.deepcopy(self.agent), copy.deepcopy(self.currMap))
         currMap=tempSokoban.getCurrMap()
-        agent=tempSokoban.getAgentPosition()
-        currRow=agent[0]
-        currColumn=agent[1]
+        currRow=tempSokoban.agent[0]
+        currColumn=tempSokoban.agent[1]
         currState=currMap[currRow][currColumn]
         if (direction == 0):
             targetRow=currRow-1
@@ -162,6 +162,7 @@ class SokobanMap:
             # 更新位置
             # update agent position
             tempSokoban.agent=[targetRow,targetColumn]
+            # print(tempSokoban.agent)
             # 更新地图
             # update map
             currMap[targetRow][targetColumn]=4
