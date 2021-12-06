@@ -2,6 +2,7 @@ import numpy as np
 from SokobanMap import SokobanMap
 #map中数值含义：      0:空白    1：墙     2：箱子位置    3：箱子目标    4：小人    5:箱子在目标上    6:小人在目标上
 #map values：      0:null    1：wall     2：box    3：storage location    4：agent    5:box in storage   6:agent on storage
+
 def loadMapFromTxt(fileName):
     with open("./inputTxt/"+fileName+".txt","r") as f:
         walls=[]
@@ -82,6 +83,8 @@ def isDeadLock(Sokoban : SokobanMap):
     for i in range(len(boxes)):
         boxRow=boxes[i][0]
         boxColumn=boxes[i][1]
+        if (currMap[boxRow][boxColumn] == 5):
+            continue
         up=currMap[boxRow-1][boxColumn]
         up=(up == 1) or (up == 2) or (up == 5)
         right=currMap[boxRow][boxColumn+1]
@@ -128,6 +131,14 @@ def loadMapFromVisualRepresentationTxt(fileName):
                 elif (currStr == "$"):
                     currLineMap.append(2)
                     boxes.append([lineCt,i])
+                elif (currStr == "V"):
+                    currLineMap.append(5)
+                    boxes.append([lineCt,i])
+                    targets.append([lineCt,i])
+                elif (currStr == "O"):
+                    currLineMap.append(6)
+                    agent=[lineCt,i]
+                    targets.append([lineCt,i])
                 else:
                     print("Wrong format.")
                     return None
