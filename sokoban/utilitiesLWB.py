@@ -1,5 +1,8 @@
 import numpy as np
 from SokobanMap import SokobanMap
+from PIL import Image
+import imageio
+from map_generator.MapGenerator import generate_map
 #map中数值含义：      0:空白    1：墙     2：箱子位置    3：箱子目标    4：小人    5:箱子在目标上    6:小人在目标上
 #map values：      0:null    1：wall     2：box    3：storage location    4：agent    5:box in storage   6:agent on storage
 def loadMapFromTxt(fileName):
@@ -128,6 +131,14 @@ def loadMapFromVisualRepresentationTxt(fileName):
                 elif (currStr == "$"):
                     currLineMap.append(2)
                     boxes.append([lineCt,i])
+                elif (currStr == "V"):
+                    currLineMap.append(5)
+                    boxes.append([lineCt,i])
+                    targets.append([lineCt,i])
+                elif (currStr == "O"):
+                    currLineMap.append(6)
+                    agent=[lineCt,i]
+                    targets.append([lineCt,i])                   
                 else:
                     print("Wrong format.")
                     return None
@@ -164,3 +175,48 @@ def showMap(currMap):
         print(currStr)
     print("")
     return "Successfully printed map."
+
+def GenerateMap(map_width,map_height,num_of_chests,num_of_moves):
+    temp_map, temp_level_name = generate_map(map_width=map_width, map_height=map_height,
+                                                         num_of_chests=num_of_chests, num_of_moves=num_of_moves)
+    Sokoban_map = loadMapFromVisualRepresentationTxt(temp_level_name[:-4])
+    return Sokoban_map
+
+
+
+def Map2Png(currMap):
+    #map中数值含义：      0:空白    1：墙     2：箱子位置    3：箱子目标    4：小人    5:箱子在目标上    6:小人在目标上
+#map values：      0:null    1：wall     2：box    3：storage location    4：agent    5:box in storage   6:agent on storage
+    TotalMap = Image.new('RGB', [45*currMap.shape[0],45*currMap.shape[1]], color=0)
+    pic0 = Image.open('./picture/0'+'.png')
+    pic1 = Image.open('./picture/1'+'.png')
+    pic2 = Image.open('./picture/2'+'.png')
+    pic3 = Image.open('./picture/3'+'.png')
+    pic4 = Image.open('./picture/4'+'.png')
+    pic5 = Image.open('./picture/5'+'.png')
+    for row in range(currMap.shape[0]):
+        currStr=""
+        for col in range(currMap.shape[1]):
+            curr=currMap[row][col]
+            if (curr == 0):
+                TotalMap.paste(pic0, [45*col,45*row], mask = None)
+            elif(curr == 1):
+                TotalMap.paste(pic1, [45*col,45*row], mask = None)
+            elif(curr == 2):
+                TotalMap.paste(pic2, [45*col,45*row], mask = None)
+            elif(curr == 3):
+                TotalMap.paste(pic3, [45*col,45*row], mask = None)
+            elif(curr == 4):
+                TotalMap.paste(pic4, [45*col,45*row], mask = None)
+            elif(curr == 5):
+                TotalMap.paste(pic5, [45*col,45*row], mask = None)
+            else:
+                TotalMap.paste(pic4, [45*col,45*row], mask = None)
+            
+        print(currStr)
+    return TotalMap
+    return "Successfully map2png."
+
+def Png2Gif(gif_images,path):
+    gif_images.append(gif_images[len(gif_images)-1])
+    imageio.mimsave(path+'Sokoban.gif', gif_images, duration=1)
