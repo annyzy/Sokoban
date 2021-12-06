@@ -77,6 +77,7 @@ def isAllTarget(Sokoban : SokobanMap):
 def isDeadLock(Sokoban : SokobanMap):
     currMap=Sokoban.getCurrMap()
     boxes=Sokoban.getBoxPositions()
+    targets=Sokoban.targets
     #http://www.sokobano.de/wiki/index.php?title=Deadlocks
     # Dead square deadlocks
     # Freeze deadlocks
@@ -95,11 +96,22 @@ def isDeadLock(Sokoban : SokobanMap):
         left=(left == 1) or (left == 2) or (left == 5)
         if (up and right) or (right and down) or (down and left) or (left and up):
             return True
+        for target in targets:
+            targetRow = target[0]
+            targetColumn = target[1]
+            if (up and targetRow>=boxRow):
+                return False
+            elif(right and targetColumn>=boxColumn):
+                return False
+            elif(down and targetRow<=boxRow):
+                return False
+            elif(left and targetColumn<=boxColumn):
+                return False
     # Corral deadlocks
     # Closed diagonal deadlocks
     # Bipartite deadlocks
     # Deadlocks due to frozen boxes
-    return False
+    return True
 
 def loadMapFromVisualRepresentationTxt(fileName):
     with open("./inputTxt/"+fileName+".txt","r") as f:

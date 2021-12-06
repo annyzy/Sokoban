@@ -15,7 +15,7 @@ if __name__ == '__main__':
     currFileName = "testingDQN"
     Sokoban = utilitiesLWB.loadMapFromVisualRepresentationTxt(currFileName);
     mapSize = Sokoban.getMapSize()
-    agent = Agent(gamma=0.9999, epsilon=1, batch_size=256, n_actions=4, eps_end=0.1, input_dims=(1, 7, *mapSize),
+    agent = Agent(gamma=0.9999, epsilon=1, batch_size=256, name=currFileName,n_actions=4, eps_end=0.1, input_dims=(1, 7, *mapSize),
                   lr=0.001, chkpt_dir="saved_model/")
     try:
         agent.load_models()
@@ -34,7 +34,7 @@ if __name__ == '__main__':
         done = False
         actions=[]
         rewards=[]
-        stepLimit = 2000
+        stepLimit = 5000
         stepCt=0
         while not done:
             observation = Sokoban.getTrainMaps()
