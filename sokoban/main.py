@@ -14,7 +14,9 @@ actionToWord= {
 if __name__ == '__main__':
     currFileName = "testingDQN"
     Sokoban = utilitiesLWB.loadMapFromVisualRepresentationTxt(currFileName);
+    #Sokoban = utilitiesLWB.GenerateMap(10, 10, 3, 20) #random map 
     mapSize = Sokoban.getMapSize()
+    #gif_images=[] #save images
     agent = Agent(gamma=0.9999, epsilon=1, batch_size=256, n_actions=4, eps_end=0.1, input_dims=(1, 7, *mapSize),
                   lr=0.001, chkpt_dir="saved_model/")
     try:
@@ -89,3 +91,5 @@ if __name__ == '__main__':
         print("Reward: "+str(reward))
         print("Score: "+str(score))
         utilitiesLWB.showMap(Sokoban.currMap)
+        #gif_images.append(utilitiesLWB.Map2Png(Sokoban.currMap)) #save map images
+    #utilitiesLWB.Png2Gif(gif_images,'./') # save as gif
