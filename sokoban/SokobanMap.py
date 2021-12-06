@@ -11,6 +11,35 @@ class SokobanMap:
         self.agent = agent
         self.currMap = currMap
 
+        # self.wallsORG = copy.deepcopy(walls)
+        # self.boxesORG = copy.deepcopy(boxes)
+        # self.targetsORG = copy.deepcopy(targets)
+        # self.agentORG = copy.deepcopy(agent)
+        # self.currMapORG = copy.deepcopy(currMap)
+
+    # def resetGame(self):
+    #     self.walls = copy.deepcopy(self.wallsORG)
+    #     self.boxes = copy.deepcopy(self.boxesORG)
+    #     self.targets = copy.deepcopy(self.targetsORG)
+    #     self.agent = copy.deepcopy(self.agentORG)
+    #     self.currMap = copy.deepcopy(self.currMapORG)
+    #     print(self.currMapORG)
+    #     print("====================")
+    #     print(copy.deepcopy(self.currMapORG))
+
+    def getTrainMaps(self):
+        rows=self.currMap.shape[0]
+        columns=self.currMap.shape[1]
+        rslt=np.zeros((7,rows,columns))
+        for row in range(rows):
+            for col in range(columns):
+                for element in range(7):
+                    if self.currMap[row][col]==element:
+                        rslt[element][row][col]=float(1)
+        rslt = rslt.astype('float32')
+        return rslt
+
+
     def getMapSize(self):
         return self.currMap.shape
 
@@ -60,6 +89,10 @@ class SokobanMap:
             targetNextRow=currRow
             targetNextColumn=currColumn-2
         else:
+            return "Wrong direction"
+        if targetNextRow<0 or targetNextRow>=currMap.shape[0]:
+            return None
+        if targetNextColumn<0 or targetNextColumn>=currMap.shape[1]:
             return None
         targetState=currMap[targetRow][targetColumn]
         targetNextState=currMap[targetNextRow][targetNextColumn]
@@ -112,12 +145,15 @@ class SokobanMap:
         tempSokoban=self.move(direction)
         #check all-target
         if (utilitiesLWB.isAllTarget(tempSokoban)):
-            return 100
+            print("all-target")
+            return 100,tempSokoban
         #check deadlock
         if (utilitiesLWB.isDeadLock(tempSokoban)):
-            return -100
+            return -100,tempSokoban
 
-        return reward
+        # if reward==-1:
+            # reward=-0.1
+        return reward,tempSokoban
 
     # direction：      0:上    1：右     2：下    3：左
     # direction：      0:Up    1：Right     2：Down    3：Left
