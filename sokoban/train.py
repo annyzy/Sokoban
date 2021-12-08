@@ -4,6 +4,33 @@ import matplotlib.pyplot as plt
 from setupDQN import Agent
 import numpy as np
 
+actionToWord= {
+    0: "U",
+    1: "R",
+    2: "D",
+    3: "L"
+}
+
+def outputBestActions(name,actions,rewards):
+    i = 0
+    # print(actions)
+    while True:
+        try:
+            if (actions[i] == actions[i + 2] and abs(actions[i] - actions[i + 1]) == 2 and rewards[i] != 10 and rewards[i] != 100 and rewards[i + 1] != 10 and rewards[i + 1] != 100):
+                actions.pop(i)
+                actions.pop(i)
+                rewards.pop(i)
+                rewards.pop(i)
+                # print(actions)
+            else:
+                i = i + 1
+        except:
+            break
+    with open("./result/"+name+".txt", "w") as txt_file:
+        txt_file.write(str(len(actions)))
+        for action in actions:
+            txt_file.write(" "+actionToWord[action])  # works with any number of elements in a line
+
 def plot_learning_curve(x,scores,epsilons,filename,lines=None):
     fig=plt.figure()
     ax=fig.add_subplot(111,label="1")
@@ -31,10 +58,12 @@ def plot_learning_curve(x,scores,epsilons,filename,lines=None):
     plt.savefig(filename)
 
 if __name__ == '__main__':
-    currFileName="testingDQN"
+    currFileName="input-01"
     Sokoban = utilitiesLWB.loadMapFromVisualRepresentationTxt(currFileName);
+    # Sokoban = utilitiesLWB.loadMapFromTxt(currFileName)
+    utilitiesLWB.showMap(Sokoban.currMap)
     mapSize=Sokoban.getMapSize()
-    agent = Agent(gamma=0.9999, epsilon=1, batch_size=128, n_actions=4, eps_end=0.5, input_dims=(1,7,*mapSize), lr=0.001,chkpt_dir="saved_model/",name=currFileName)
+    agent = Agent(gamma=0.9999, epsilon=1, batch_size=32, n_actions=4, eps_end=0.5, input_dims=(1,7,*mapSize), lr=0.001,chkpt_dir="saved_model/",name=currFileName)
     try:
         agent.load_models()
         print('... checkpoint loaded ...')
@@ -43,17 +72,23 @@ if __name__ == '__main__':
     scores,eps_history=[],[]
     reportPeriod=1
     n_games=1000
-    stepLimit = 5000
+    stepLimit = 2500
     M=mapSize[0]
     N=mapSize[1]
     overAllStepCt=0
+
     lastAction=-99
     lastReward=-9999
+    recordNumOfTargets=-1;
+    recordStepCt=stepLimit*2;
     for i in range(n_games):
+        trackActions=[]
+        trackRewards=[]
         numOfTargets=0
         score=0
         done=False
         Sokoban = utilitiesLWB.loadMapFromVisualRepresentationTxt(currFileName)
+        # Sokoban = utilitiesLWB.loadMapFromTxt(currFileName)
         # utilitiesLWB.showMap(Sokoban.currMap)
         observation3= Sokoban.getTrainMaps()
         observation3 = observation3.reshape((1,1,7,M,N))
@@ -74,6 +109,8 @@ if __name__ == '__main__':
             try:
                 reward,tempSokoban = Sokoban.getReward(action)
                 # moved
+                trackActions.append(action)
+                trackRewards.append(reward)
                 if (i == n_games - 1):
                     print("=============================")
                     print(score)
@@ -96,6 +133,8 @@ if __name__ == '__main__':
                         break
                 action = np.random.choice(actions)
                 reward, tempSokoban = Sokoban.getReward(action)
+                trackActions.append(action)
+                trackRewards.append(reward)
             score += reward
 
             observation_ = tempSokoban.getTrainMaps()
@@ -107,6 +146,8 @@ if __name__ == '__main__':
                 overAllStepCt += 1
                 stepCt += 1
                 actions.pop(actions.index(action))
+                trackActions.pop(len(trackActions)-1)
+                trackRewards.pop(len(trackRewards)-1)
                 position = 0
                 # utilitiesLWB.showMap(Sokoban.currMap)
                 while True:
@@ -126,10 +167,14 @@ if __name__ == '__main__':
                 else:
                     action = np.random.choice(actions)
                     reward, tempSokoban = Sokoban.getReward(action)
+                    trackActions.append(action)
+                    trackRewards.append(reward)
                     observation_ = Sokoban.getTrainMaps()
                     observation_ = observation_.reshape((1, 1, 7, M, N))
             if (len(actions)>1 and abs(action-lastAction)==2 and lastReward!=100 and lastReward!=max(10,100/len(Sokoban.boxes))):
                 done = False
+                trackActions.pop(len(trackActions)-1)
+                trackRewards.pop(len(trackRewards)-1)
                 continue
                 # overAllStepCt += 1
                 # stepCt += 1
@@ -142,10 +187,12 @@ if __name__ == '__main__':
             lastAction=action
             lastReward=reward
             Sokoban = tempSokoban
+            # print(stepCt)
             if (reward == 10):
                 reward=max(10,100/len(Sokoban.boxes))
                 numOfTargets+=1
             if (reward == 100):
+                numOfTargets += 1
                 print("+++++++++++++++++++++target stepCt "+str(stepCt)+"+++++++++++++++++++++")
                 done = True
             agent.store_trasition(observation3, action, reward, observation_, done)
@@ -158,7 +205,7 @@ if __name__ == '__main__':
             #     observation2 = observation3
             observation3 = observation_
 
-            if (overAllStepCt%500==1):
+            if (overAllStepCt%5000==1):
                 agent.learn(True)
             else:
                 agent.learn(False)
@@ -179,6 +226,14 @@ if __name__ == '__main__':
                   '|total steps %.0f' % overAllStepCt,
                   '| %.0f target hit' % numOfTargets)
             agent.save_models()
+
+        if (numOfTargets>recordNumOfTargets):
+            recordNumOfTargets=numOfTargets;
+            outputBestActions(currFileName+"_"+str(recordNumOfTargets)+"_of_"+str(len(Sokoban.targets)),trackActions,trackRewards)
+            recordStepCt=stepCt
+        elif (numOfTargets==recordNumOfTargets and stepCt < recordStepCt):
+            recordStepCt=stepCt
+            outputBestActions(currFileName + "_" + str(recordNumOfTargets) + "_of_" + str(len(Sokoban.targets)),trackActions, trackRewards)
 
     x=[i+1 for i in range(n_games)]
     filename= 'testing_DQN.png'

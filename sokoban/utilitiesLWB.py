@@ -56,8 +56,8 @@ def loadMapFromTxt(fileName):
             currline = fifthLine.split(" ")
             agentRow=int(currline[0])-1
             agentColumn=int(currline[1])-1
-            agent=[currRow,currColumn]
-            if ([currRow,currColumn] in targets):
+            agent=[agentRow,agentColumn]
+            if ([agentRow,agentColumn] in targets):
                 currMap[agentRow][agentColumn] = 6
             else:
                 currMap[agentRow][agentColumn] = 4
@@ -87,31 +87,32 @@ def isDeadLock(Sokoban : SokobanMap):
         if (currMap[boxRow][boxColumn] == 5):
             continue
         up=currMap[boxRow-1][boxColumn]
-        up=(up == 1) or (up == 2) or (up == 5)
+        up=(up == 1) #or (up == 2) or (up == 5)
         right=currMap[boxRow][boxColumn+1]
-        right=(right == 1) or (right == 2) or (right == 5)
+        right=(right == 1) #or (right == 2) or (right == 5)
         down=currMap[boxRow+1][boxColumn]
-        down=(down == 1) or (down == 2) or (down == 5)
+        down=(down == 1) #or (down == 2) or (down == 5)
         left=currMap[boxRow][boxColumn-1]
-        left=(left == 1) or (left == 2) or (left == 5)
+        left=(left == 1) #or (left == 2) or (left == 5)
         if (up and right) or (right and down) or (down and left) or (left and up):
             return True
-        for target in targets:
-            targetRow = target[0]
-            targetColumn = target[1]
-            if (up and targetRow>=boxRow):
-                return False
-            elif(right and targetColumn>=boxColumn):
-                return False
-            elif(down and targetRow<=boxRow):
-                return False
-            elif(left and targetColumn<=boxColumn):
-                return False
+        # for target in targets:
+        #     targetRow = target[0]
+        #     targetColumn = target[1]
+        #     if (up and targetRow>=boxRow):
+        #         return False
+        #     elif(right and targetColumn>=boxColumn):
+        #         return False
+        #     elif(down and targetRow<=boxRow):
+        #         return False
+        #     elif(left and targetColumn<=boxColumn):
+        #         return False
     # Corral deadlocks
     # Closed diagonal deadlocks
     # Bipartite deadlocks
     # Deadlocks due to frozen boxes
-    return True
+    return False
+    # return True
 
 def loadMapFromVisualRepresentationTxt(fileName):
     with open("./inputTxt/"+fileName+".txt","r") as f:
