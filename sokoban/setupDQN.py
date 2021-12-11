@@ -64,7 +64,7 @@ class DeepQNetwork(nn.Module):
         return actions
 
 class Agent():
-    def __init__(self,gamma,epsilon,lr,input_dims,batch_size,n_actions,chkpt_dir="saved_model/",max_mem_size=1000000,eps_end=0.1,eps_dec=5e-6):
+    def __init__(self,gamma,epsilon,lr,input_dims,batch_size,n_actions,name,chkpt_dir="saved_model/",max_mem_size=1000000,eps_end=0.15,eps_dec=5e-5):
         self.gamma=gamma
         self.epsilon=epsilon
         self.lr=lr
@@ -74,8 +74,8 @@ class Agent():
         self.mem_size=max_mem_size
         self.batch_size=batch_size
         self.mem_cntr = 0
-        self.Q_eval=DeepQNetwork(self.lr, n_actions=n_actions, input_dims=input_dims,name="Q_eval",chkpt_dir=chkpt_dir)
-        self.Q_targ=DeepQNetwork(self.lr, n_actions=n_actions, input_dims=input_dims,name="Q_targ",chkpt_dir=chkpt_dir)
+        self.Q_eval=DeepQNetwork(self.lr, n_actions=n_actions, input_dims=input_dims,name=name+"_Q_eval",chkpt_dir=chkpt_dir)
+        self.Q_targ=DeepQNetwork(self.lr, n_actions=n_actions, input_dims=input_dims,name=name+"_Q_targ",chkpt_dir=chkpt_dir)
         self.state_memory = np.zeros((self.mem_size, *input_dims), dtype=np.float32)
         self.new_state_memory = np.zeros((self.mem_size, *input_dims), dtype=np.float32)
         self.action_memory = np.zeros(self.mem_size, dtype=np.int32)
