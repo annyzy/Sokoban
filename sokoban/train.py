@@ -58,12 +58,12 @@ def plot_learning_curve(x,scores,epsilons,filename,lines=None):
     plt.savefig(filename)
 
 if __name__ == '__main__':
-    currFileName="input-01"
+    currFileName="input-05b"
     Sokoban = utilitiesLWB.loadMapFromVisualRepresentationTxt(currFileName);
     # Sokoban = utilitiesLWB.loadMapFromTxt(currFileName)
     utilitiesLWB.showMap(Sokoban.currMap)
     mapSize=Sokoban.getMapSize()
-    agent = Agent(gamma=0.9999, epsilon=1, batch_size=32, n_actions=4, eps_end=0.5, input_dims=(1,7,*mapSize), lr=0.001,chkpt_dir="saved_model/",name=currFileName)
+    agent = Agent(gamma=0.9999, epsilon=1, batch_size=96, n_actions=4, eps_end=0.1, input_dims=(1,7,*mapSize), lr=0.001,chkpt_dir="saved_model/",name=currFileName)
     try:
         agent.load_models()
         print('... checkpoint loaded ...')
@@ -75,6 +75,7 @@ if __name__ == '__main__':
     stepLimit = 2500
     M=mapSize[0]
     N=mapSize[1]
+    overAllSteps=[]
     overAllStepCt=0
 
     lastAction=-99
@@ -213,6 +214,9 @@ if __name__ == '__main__':
                 done = True
 
         scores.append(score)
+
+        overAllSteps.append(overAllStepCt)
+
         eps_history.append(agent.epsilon)
 
         avg_score=np.mean(scores[-100:])
@@ -227,7 +231,10 @@ if __name__ == '__main__':
                   '| %.0f target hit' % numOfTargets)
             agent.save_models()
 
-        if (numOfTargets>recordNumOfTargets):
+        if (i % (reportPeriod*5) == 0):
+            plot_learning_curve(overAllSteps, scores, eps_history, currFileName + "_curve")
+
+        if (numOfTargets>=1 and numOfTargets>recordNumOfTargets):
             recordNumOfTargets=numOfTargets;
             outputBestActions(currFileName+"_"+str(recordNumOfTargets)+"_of_"+str(len(Sokoban.targets)),trackActions,trackRewards)
             recordStepCt=stepCt
@@ -235,6 +242,3 @@ if __name__ == '__main__':
             recordStepCt=stepCt
             outputBestActions(currFileName + "_" + str(recordNumOfTargets) + "_of_" + str(len(Sokoban.targets)),trackActions, trackRewards)
 
-    x=[i+1 for i in range(n_games)]
-    filename= 'testing_DQN.png'
-    plot_learning_curve(x,scores,eps_history,filename)

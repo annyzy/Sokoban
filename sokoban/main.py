@@ -20,19 +20,19 @@ wordToAction= {
 }
 
 if __name__ == '__main__':
-    currFileName = "input-01"
+    currFileName = "input-03"
     Sokoban = utilitiesLWB.loadMapFromVisualRepresentationTxt(currFileName);
     utilitiesLWB.showMap(Sokoban.currMap)
-    with open("./result/"+currFileName+"_3_of_3"+".txt","r") as f:
+    with open("./result/"+currFileName+"_4_of_"+str(len(Sokoban.targets))+".txt","r") as f:
         for line in f:
             firstLine = line.strip('\n')
             actions = firstLine.split(" ")
             actions.pop(0)
     score=0
-    for data in actions:
-        action=wordToAction[data]
-        print("--------------------------------------------------")
-        print("Action: " + data)
+    for i in range(len(actions)):
+        action=wordToAction[actions[i]]
+        print("----------------------Step#"+str(i+1)+"----------------------")
+        print("Action: " + actions[i])
 
         reward, Sokoban = Sokoban.getReward(action)
         score += reward
